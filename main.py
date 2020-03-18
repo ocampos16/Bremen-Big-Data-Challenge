@@ -4,11 +4,11 @@ from os import path
 import glob
 import pandas as pd
 import platform
-# Imports for managing files
+# Imports for managing file
 from csv import writer
 from csv import reader
-# We import our files
-import preprocessing as pre
+# We import our file
+from PreProcessing import PreProcessing
 
 # We add a column to a csv file
 def add_column_in_csv(input_file, output_file, transform_row):
@@ -29,14 +29,14 @@ def add_column_in_csv(input_file, output_file, transform_row):
 			csv_writer.writerow(row)
 
 
-# This method will add a column to the emg files with the names of the subjects that were used.
+# This method will add a column to the emg file with the names of the subjects that were used.
 def add_test_subject_column():
 	# We get the extension to the csv
 	extension = 'csv'
 	# We get all the file names into a list
 	all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
 
-	# Now we loop through all the files and append the
+	# Now we loop through all the file and append the
 	for filename in all_filenames:
 		print('Filename ='+filename)
 
@@ -53,7 +53,7 @@ def add_test_subject_column():
 		# Add a column to a csv file; source: https://thispointer.com/python-add-a-column-to-an-existing-csv-file/
 		# add_column_in_csv(filename, output_file, lambda row, line_num: row.insert(0, split_filename[0]))
 
-		print('Add a column with same values to an existing csv file with header')
+		print('Column '+header_of_new_col+' with all rows successfully added to '+filename+"!")
 
 
 # the switcher method returns the separator based on the OS.
@@ -83,45 +83,68 @@ def combine_emg_files():
 		# all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
 		# We get all the file_names with the prefix output
 		all_filenames = [i for i in glob.glob('output_*.{}'.format(extension))]
-		# combine all files in the list
+		# combine all file in the list
 		combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames])
 		# export to csv
 		combined_csv.to_csv("combined_csv.csv", index=False, encoding='utf-8-sig')
 
-		# If we get here then the files were combined correctly.
+		# If we get here then the file were combined correctly.
 		print('Files were combined successfully')
 	except:
-		# If we get here then there was an error when combining the files
-		print('There was an error while combining the files')
+		# If we get here then there was an error when combining the file
+		print('There was an error while combining the file')
 
 
 # We execute the main function
 if __name__ == '__main__':
-	# We will start by combining the training data from the emg recordings into a single csv file.
+
+	# We will start by locating the data
+	# And then combining the training data from the emg recordings into a single csv file.
 	c_dir = os.getcwd()
 	# We add the new directory
 	# But first we determine the separator based on our OS
 	sep = get_os_directory_separator()
-	n_dir = c_dir + '' + sep + 'bbdc_2020' + sep + 'train' + sep + 'emg'
+
+	# We set the two working directories for the data
+	emg_dir = c_dir + '' + sep + 'bbdc_2020' + sep + 'train' + sep + 'emg'
+	mocap_dir = c_dir + '' + sep + 'bbdc_2020' + sep + 'train' + sep + 'mocap'
 
 	# Combined file string
-	end_emg_file = sep + 'combined_csv.csv'
+	end_combined_file = sep + 'combined_csv.csv'
 
-	# We will first check if there's no 'combined_csv' file in 'bbdc_2020\train\emg'
-	if not path.exists(n_dir+end_emg_file):
-		# If this doesn't exist then we will create a new file
-		pre.__init__()
-	else:
-		# We create the file
-		# Now we proceed to change the directory
-		os.chdir(n_dir)
+	# We create a list of the combined_csv file
+	combined_files_list = {emg_dir+end_combined_file, mocap_dir+end_combined_file}
 
-		# We add the filename as a column to each file
-		add_test_subject_column()
+	# We will iterate through the combined_files_list and check if 'combined_csv' exists on both folders.
+	print("Checking combined files...")
+	for file in combined_files_list:
+		# We will first check if there's no 'combined_csv' file in 'bbdc_2020\train\emg'
+		if not path.exists(file):
+			# If the file doesn't exist then we will create it.
+			# If files don't exist we create them
+			print("File: "+file+" doesn't exist.")
+			print("Creating "+file+"...")
+			# We create the file
+			# Now we proceed to change the directory
+			temp_dir = file.rsplit('\\', 1)[0]
+			os.chdir(temp_dir)
 
-		# Once we change the directory we will proceed to combine the csv files into one single file for easier
-		# handling.
-		combine_emg_files()
+			# We add the filename as a column to each file
+			add_test_subject_column()
 
-	# We finish the executionm of the program
+			# Once we change the directory we will proceed to combine the csv file into one single file for easier
+			# handling.
+			combine_emg_files()
+
+			# If we get here then the file was created successfully
+			print("File: " + file + " has been created successfully.")
+		else:
+			print("File: " + file + " exists!")
+
+	# If we have reached this point then we will proceed to run pre-processing on both files.
+	# We will first create an instance of PreProcessing.py
+	pre = PreProcessing()
+	pre.pre_process_data_frame()
+
+	# We finish the execution of the program
 	print("Finished execution!")

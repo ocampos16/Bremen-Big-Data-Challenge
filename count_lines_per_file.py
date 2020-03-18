@@ -32,8 +32,8 @@ c_dir = os.getcwd()
 # We add the new directory
 # But first we determine the separator based on our OS
 sep = get_os_directory_separator()
-n_dir = c_dir + '' + sep + 'bbdc_2020' + sep + 'train' + sep + 'emg'
-# n_dir = c_dir + '' + sep + 'bbdc_2020' + sep + 'test_combine'
+n_dir = c_dir + '' + sep + 'bbdc_2020' + sep + 'train' + sep + 'mocap'
+# emg_dir = c_dir + '' + sep + 'bbdc_2020' + sep + 'test_combine'
 # Now we proceed to change the directory
 os.chdir(n_dir)
 
@@ -41,6 +41,8 @@ os.chdir(n_dir)
 extension = 'csv'
 # Now we count the lines per file
 all_filenames = [i for i in glob.glob('combined_csv.{}'.format(extension))]
+# all_filenames = [i for i in glob.glob('s*.{}'.format(extension))]
+# all_filenames = [i for i in glob.glob('output*.{}'.format(extension))]
 
 file_dict = {}
 total = 0
@@ -51,7 +53,7 @@ for filename in all_filenames:
 
 num_files = len(all_filenames)
 print('Total count: '+str(total - num_files))
-print("All the line files have been counted")
+print("All the line file have been counted")
 
 # Now we write the dictionary to a csv file
 with open('file_stats.csv', 'w') as f:
